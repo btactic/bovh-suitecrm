@@ -1,0 +1,6 @@
+; Configuración API de OVH
+
+applicationKey = "0123456789abcde"
+applicationSecret = "01234567890123456789abcdefghijk"
+consumer_key = "01234567890123456789abcdefghijk"
+
