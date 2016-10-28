@@ -21,25 +21,62 @@ class IP {
 
     public function sync_ip($ip) {
         $keys_values = array();
-        $keys_values['name'] = str_replace("/32", "", $ip);
+        $keys_values['name'] = ($this->is_ipv4_block($ip)) 
+               ? str_replace("/32", "", $ip) : $ip;
         $bean = retrieve_record_bean('btc_IP', $keys_values);
         $bean->name = $keys_values['name'];
-        $ip = str_replace("/", "%2F", $ip);
+        $ip_encoded = str_replace("/", "%2F", $ip);
         try {
-            $ip_info = $this->ovh->get('/ip/'.$ip);
+            $ip_info = $this->ovh->get('/ip/'.$ip_encoded);
             $bean->tipoip = $ip_info['type'];
             $bean->description = $ip_info['description'];
             //Routed to (nombre servidor dedicado): $ip_info['routedTo']['serviceName']
         } catch (Exception $e) {}
         try {
-            $reverses = $this->ovh->get('/ip/'.$ip.'/reverse');
+            $reverses = $this->ovh->get('/ip/'.$ip_encoded.'/reverse');
             if (isset($reverses[0])) {
-                $ipReverse = $this->ovh->get('/ip/'.$ip.'/reverse/'.$reverses[0]);
+                $ipReverse = $this->ovh->get('/ip/'.$ip_encoded.'/reverse/'.$reverses[0]);
                 $bean->dns = $ipReverse['reverse'];
             }
         } catch (Exception $e) {}
         $bean->save();
+        if ($this->is_ipv4_block($ip)) {
+            list($ipv4, $mask) = explode("/", "$ip");
+            if ($mask < 32) $this->sync_ipv4_block($bean, $ipv4, $mask);
+        }
     }
+
+    private function sync_ipv4_block($parent_bean, $ipv4, $mask) {
+        for ($i = 0; $i < $this->get_ipv4_block_lenght($mask); $i += 1) {
+            $ip = long2ip(ip2long($ipv4)+$i);
+            $keys_values = array();
+            $keys_values['name'] = $ip;
+            $bean = retrieve_record_bean('btc_IP', $keys_values);
+            $bean->name = $keys_values['name'];
+            $bean->tipoip = $paren_bean->tipoip;
+            $bean->description = $parent_bean->description;
+            try {
+                $ip_block_encoded = $ip."%2F".$mask;
+                $ipReverse = $this->ovh->get('/ip/'.$ip_block_encoded.'/reverse/'.$ip);
+                $bean->dns = $ipReverse['reverse'];
+            } catch (Exception $e) {}
+            $bean->save();
+            $bean->load_relationship('btc_ip_btc_ip');
+            $bean->btc_ip_btc_ip->add($parent_bean);
+        }
+    }
+
+    private function get_ipv4_block_lenght($mask) {
+        return pow(2, 32-$mask);
+    }
+
+    private function is_ipv4_block($ipv4) {
+        return preg_match("/^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}"
+                ."(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\/"
+                ."([1-9]|[1-2][0-9]|3[0-2])$/", $ipv4);
+    }
+
+    
 
 }
 
