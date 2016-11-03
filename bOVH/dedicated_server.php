@@ -26,6 +26,7 @@ class DedicatedServer {
             $keys_values['identificador'] = $server_info['serverId'];
             $bean = retrieve_record_bean('btc_Servidores', $keys_values);
             if (!isset($bean->name)) $bean->name = $servername;
+            $bean->ovh_server_name = $servername;
             $bean->identificador = $server_info['serverId'];
             $bean->datacenter = $server_info['datacenter'];
             $bean->inversa = $server_info['reverse'];

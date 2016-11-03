@@ -30,7 +30,7 @@ class IP {
             $ip_info = $this->ovh->get('/ip/'.$ip_encoded);
             $bean->tipoip = $ip_info['type'];
             $bean->description = $ip_info['description'];
-            //Routed to (nombre servidor dedicado): $ip_info['routedTo']['serviceName']
+            $assigned_servername = $ip_info['routedTo']['serviceName'];
         } catch (Exception $e) {}
         try {
             $reverses = $this->ovh->get('/ip/'.$ip_encoded.'/reverse');
@@ -43,6 +43,9 @@ class IP {
         if ($this->is_ipv4_block($ip)) {
             list($ipv4, $mask) = explode("/", "$ip");
             if ($mask < 32) $this->sync_ipv4_block($bean, $ipv4, $mask);
+        }
+        if (isset($assigned_servername)) {
+            $this->relate_ip_with_server($bean, $assigned_servername);
         }
     }
 
@@ -68,6 +71,16 @@ class IP {
 
     private function get_ipv4_block_lenght($mask) {
         return pow(2, 32-$mask);
+    }
+
+    private function relate_ip_with_server($ip_bean, $servername) {
+        $keys_values = array();
+        $keys_values['ovh_server_name'] = $servername;
+        $server_bean = retrieve_record_bean('btc_Servidores', $keys_values);
+        if (!empty($server_bean->id)) {
+            $server_bean->load_relationship('btc_servidores_btc_ip');
+            $server_bean->btc_servidores_btc_ip->add($ip_bean);
+        }
     }
 
     private function is_ipv4_block($ipv4) {
