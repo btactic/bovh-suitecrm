@@ -16,6 +16,7 @@ function main() {
     $ip->sync_all_ips();
     $virtualAddress = new VirtualAddress(OVH::get_api_instance());
     $virtualAddress->sync_all_virtual_addresses();
+    $GLOBALS['log']->fatal("[bOVH] bOVH synchronization finished.");
     return true;
 }
 
