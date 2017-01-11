@@ -22,7 +22,7 @@ class Domain {
     public function sync_domain_zone($domain) {
         $keys_values = array();
         $keys_values['name'] = $domain;
-        $bean = retrieve_record_bean('btc_dominios', $keys_values);
+        $bean = retrieve_record_bean('btc_Dominios', $keys_values);
         $bean->name = $domain;
         try {
             $zones = $this->ovh->get('/domain/zone/'.$domain.'/export');
