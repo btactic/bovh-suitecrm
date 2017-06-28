@@ -24,14 +24,18 @@ class Domain {
         $keys_values['name'] = $domain;
         $bean = retrieve_record_bean('btc_Dominios', $keys_values);
         $bean->name = $domain;
+        $has_dns = false;
+        $is_domain = false;
         try {
             $zones = $this->ovh->get('/domain/zone/'.$domain.'/export');
             $bean->dns = $zones;
+            $has_dns = true;
         } catch (Exception $e) {}
         try {
             $domain_info = $this->ovh->get('/domain/'.$domain.'/serviceInfos');
             $bean->alta = $domain_info['creation'];
             $bean->caducidad = $domain_info['expiration'];
+            $is_domain = true;
         } catch (Exception $e) {}
         try {
             $name_servers = $this->ovh->get('/domain/'.$domain.'/nameServer');
@@ -42,6 +46,13 @@ class Domain {
                     .$domain.'/nameServer/'.$name_servers[1])['host'] : '';
             $bean->dns_server2 = $DNS2;
         } catch (Exception $e) {}
+        if ($has_dns && $is_domain) {
+            $bean->tipo_c = 'dominio_con_zona_dns';
+        } else if ($has_dns) {
+            $bean->tipo_c = 'zona_dns';
+        } else {
+            $bean->tipo_c = 'dominio';
+        }
         $bean->save();
     }
 
