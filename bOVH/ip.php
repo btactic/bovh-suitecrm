@@ -56,7 +56,7 @@ class IP {
             $keys_values['name'] = $ip;
             $bean = retrieve_record_bean('btc_IP', $keys_values);
             $bean->name = $keys_values['name'];
-            $bean->tipoip = $paren_bean->tipoip;
+            $bean->tipoip = $parent_bean->tipoip;
             $bean->description = $parent_bean->description;
             try {
                 $ip_block_encoded = $ip."%2F".$mask;
