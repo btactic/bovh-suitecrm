@@ -66,11 +66,12 @@ class Domain {
     private function set_domain_owner(&$domain_bean, $owner_info) {
         if (!empty($owner_info['vat'])) {
             $keys_values = array();
-            $keys_values['nif_c'] = $owner_info['vat'];
+            $owner_nif = str_ireplace(array("ES", "-", " "), "", $owner_info['vat']);
+            $keys_values['nif_c'] = $owner_nif;
             $account_bean = retrieve_record_bean('Accounts', $keys_values);
             if (empty($account_bean->id)) {
                 $account_bean->name = $owner_info['organisationName'];
-                $account_bean->nif_c = $owner_info['vat'];
+                $account_bean->nif_c = $owner_nif;
                 $account_bean->email1 = $owner_info['email'];
                 $account_bean->phone_work = $owner_info['phone'];
                 $account_bean->billing_address_street = $owner_info['address']['line1'];
