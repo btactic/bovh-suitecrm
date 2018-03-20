@@ -60,6 +60,7 @@ class Domain {
                 $this->set_domain_owner($bean, $owner_info);
             }
         } catch (Exception $e) {}
+        $this->set_domain_provider($bean);
         $bean->save();
     }
 
@@ -83,6 +84,10 @@ class Domain {
             }
             $domain_bean->account_id_c = $account_bean->id;
         }
+    }
+
+    private function set_domain_provider(&$domain_bean) {
+        $domain_bean->btc_proveedores_id_c = '74dc0d71-0245-d796-fea0-5404ccfac41e';
     }
 
 }
