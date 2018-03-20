@@ -53,7 +53,36 @@ class Domain {
         } else {
             $bean->tipo_c = 'dominio';
         }
+        try {
+            $domain_properties = $this->ovh->get('/domain/'.$domain);
+            if (!empty($domain_properties['whoisOwner'])) {
+                $owner_info = $this->ovh->get('/me/contact/'.$domain_properties['whoisOwner']);
+                $this->set_domain_owner($bean, $owner_info);
+            }
+        } catch (Exception $e) {}
         $bean->save();
+    }
+
+    private function set_domain_owner(&$domain_bean, $owner_info) {
+        if (!empty($owner_info['vat'])) {
+            $keys_values = array();
+            $owner_nif = str_ireplace(array("ES", "-", " "), "", $owner_info['vat']);
+            $keys_values['nif_c'] = $owner_nif;
+            $account_bean = retrieve_record_bean('Accounts', $keys_values);
+            if (empty($account_bean->id)) {
+                $account_bean->name = $owner_info['organisationName'];
+                $account_bean->nif_c = $owner_nif;
+                $account_bean->email1 = $owner_info['email'];
+                $account_bean->phone_work = $owner_info['phone'];
+                $account_bean->billing_address_street = $owner_info['address']['line1'];
+                $account_bean->billing_address_city = $owner_info['address']['city'];
+                $account_bean->billing_address_state = $owner_info['address']['province'];
+                $account_bean->billing_address_postalcode = $owner_info['address']['zip'];
+                $account_bean->billing_address_country = $owner_info['address']['country'];
+                $account_bean->save();
+            }
+            $domain_bean->account_id_c = $account_bean->id;
+        }
     }
 
 }
