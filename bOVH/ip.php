@@ -56,7 +56,7 @@ class IP {
             $keys_values['name'] = $ip;
             $bean = retrieve_record_bean('btc_IP', $keys_values);
             $bean->name = $keys_values['name'];
-            $bean->tipoip = $paren_bean->tipoip;
+            $bean->tipoip = $parent_bean->tipoip;
             $bean->description = $parent_bean->description;
             try {
                 $ip_block_encoded = $ip."%2F".$mask;
@@ -78,8 +78,8 @@ class IP {
         $keys_values['ovh_server_name'] = $servername;
         $server_bean = retrieve_record_bean('btc_Servidores', $keys_values);
         if (!empty($server_bean->id)) {
-            $server_bean->load_relationship('btc_servidores_btc_ip');
-            $server_bean->btc_servidores_btc_ip->add($ip_bean);
+            $server_bean->load_relationship('btc_ip_btc_servidores');
+            $server_bean->btc_ip_btc_servidores->add($ip_bean);
         }
     }
 

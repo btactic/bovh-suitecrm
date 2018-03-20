@@ -26,7 +26,8 @@ class VirtualAddress {
                 $this->sync_virtualmac_addresses($servername, $virtualMac);
             }
         } catch (Exception $e) {
-            $GLOBALS['log']->fatal("[bOVH] Error retrieving virtual macs list.");
+            $GLOBALS['log']->fatal("[bOVH] Error retrieving virtual macs list of '"
+                    .$servername."' server.");
         }
     }
 
